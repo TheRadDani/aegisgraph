@@ -51,6 +51,8 @@ jobs:
             sed -i 's/^HTML_OUTPUT.*/HTML_OUTPUT            = html/' Doxyfile
             sed -i 's/^HTML_TIMESTAMP.*/HTML_TIMESTAMP         = YES/' Doxyfile
 
+            sed -i 's/^GENERATE_XML.*/GENERATE_XML          = YES/' Doxyfile
+
             # If USE_MDFILE_AS_MAINPAGE is not in the file, add it
             grep -q '^USE_MDFILE_AS_MAINPAGE' Doxyfile \
                 && sed -i 's|^USE_MDFILE_AS_MAINPAGE.*|USE_MDFILE_AS_MAINPAGE = README.md|' Doxyfile \
