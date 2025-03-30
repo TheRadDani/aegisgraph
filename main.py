@@ -17,7 +17,7 @@ print(walks)
 graph.save_graph("test.txt")
 
 print(aegisgraph.__file__)
-#print(aegisgraph.__version__)
+print(aegisgraph.__version__)
 print(aegisgraph.__author__)
 print(aegisgraph.__license__)
 print(aegisgraph.__description__)
