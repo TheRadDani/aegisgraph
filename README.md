@@ -4,7 +4,7 @@ AegisGraph: High-Performance Graph Library in plain C++ for Python
 <p align="center">
   <img src="https://raw.githubusercontent.com/TheRadDani/aegisgraph/main/images/aegrisgraph_logo.gif" 
        alt="aegrisgraph_logo" 
-       width="500" 
+       width="400"
        style="display: block; margin: 0 auto;">
 </p>
 
