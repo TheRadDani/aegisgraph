@@ -44,7 +44,7 @@ jobs:
 
             sed -i 's|^INPUT .*|INPUT                  = ./src ./include ./README.md|' Doxyfile
             sed -i 's|^FILE_PATTERNS .*|FILE_PATTERNS          = *.hpp *.cpp *.md|' Doxyfile
-            sed -i 's|^EXCLUDE_PATTERNS .*|EXCLUDE_PATTERNS          = */test/* */examples/*|' Doxyfile
+            sed -i 's|^EXCLUDE_PATTERNS .*|EXCLUDE_PATTERNS          = */test/* */examples/* */samples/*|' Doxyfile
 
             sed -i 's|^OUTPUT_DIRECTORY .*|OUTPUT_DIRECTORY       = ./docs|' Doxyfile
             sed -i 's/^GENERATE_HTML.*/GENERATE_HTML          = YES/' Doxyfile
