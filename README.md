@@ -1,7 +1,9 @@
-# 🚀 AegisGraph: High-Performance Graph Library in plain C++ for Python
+AegisGraph: High-Performance Graph Library in plain C++ for Python
+========
+
 
 <p align="center">
-  <img src="images/aegrisgraph_logo.gif" alt="AegrisGraph Logo" style="display: block; margin: 0 auto; width: 750px; max-width: 100%;">
+  <img src="https://github.com/user-attachments/assets/ae4d763f-6c7a-4671-aa89-3e7e35bbdd37" alt="aegrisgraph_logo" style="display: block; margin: 0 auto; width: 750px; max-width: 100%;">
 </p>
 
 ## 📚 Introduction
