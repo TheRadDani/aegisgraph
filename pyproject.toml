@@ -1,7 +1,7 @@
 # ==============================================
 # pyproject.toml for packaging aegisgraph as a Python module
 # Author: Daniel Ferreto
-# Version: 1.0
+# Version: 1.0.1
 # Date: 2025-03-27
 # Description:
 #     Secure, high-performance C++ graph processing module
@@ -15,13 +15,13 @@ requires = [
   "setuptools", 
   "wheel",
   "ninja",
-  "pybind11"
+  "pybind11>=2.11.1"
 ]
 build-backend = "scikit_build_core.build"
 
 [project]
 name = "aegisgraph"
-version = "1.0"
+version = "1.0.1"
 description = "High-performance graph processing and random walk library in C++ with Python bindings"
 authors = [
   { name = "Daniel Ferreto", email = "ldanielfch@gmail.com" }
@@ -58,7 +58,6 @@ test = [
 minimum-version = "0.7"
 build-dir = "build"
 wheel.expand-macos-universal-tags = true
-wheel.py-api = "cp312"
 
 [project.urls]
 "Homepage" = "https://github.com/TheRadDani/aegisgraph"
@@ -77,13 +76,12 @@ args = [
   "-GNinja",
   "--no-warn-unused-cli"
 ]
-define = { ABSEIL_BUILD_TESTING = false, ABSL_PROPAGATE_CXX_STD = true }
+define = { "ABSEIL_BUILD_TESTING" = false, "ABSL_PROPAGATE_CXX_STD" = true, "Python3_FIND_STRATEGY" = "LOCATION" }
 
-[tool.setuptools.dynamic.version]
-attr = 'aegisgraph.__version__'
 
 [tool.scikit-build.sdist]
 include = [
+    "third_party/*",
     "src/*",
     "include/*",
     "bindings/*",
@@ -92,6 +90,13 @@ include = [
     "pyproject.toml",
     "README.md"
 ]
+
+[tool.cibuildwheel]
+build-frontend = "build"
+skip = "*-musllinux*"  # Abseil has musl compatibility issues
+test-command = "pytest {project}/tests"
+test-requires = ["pytest", "pytest-cov"]
+environment = { "CFLAGS" = "-mavx2 -mfma -mbmi2", "CXXFLAGS" = "-mavx2 -mfma -mbmi2" }
 
 # pytest configuration
 [tool.pytest.ini_options]
