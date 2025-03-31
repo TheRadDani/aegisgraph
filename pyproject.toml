@@ -9,11 +9,8 @@
 # ==============================================
 
 [build-system]
-requires = [
-  "scikit-build-core>=0.8.0",
-  "pybind11",
-]
-build-backend = "scikit_build_core.build"
+requires = ["cibuildwheel", "setuptools", "wheel", "pybind11"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "aegisgraph"
