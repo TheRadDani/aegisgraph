@@ -1,2 +1,2 @@
 echo "🧪 Running pytest..."
-pytest tests --tb=short -q
+pytest --maxfail=1 --disable-warnings -q tests/
