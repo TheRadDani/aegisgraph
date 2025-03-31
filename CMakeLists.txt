@@ -24,14 +24,8 @@ endif()
 
 # === Abseil Dependency ===
 set(ABSL_PROPAGATE_CXX_STD ON)
-include(FetchContent)
-FetchContent_Declare(
-    abseil-cpp
-    GIT_REPOSITORY https://github.com/abseil/abseil-cpp.git
-    GIT_TAG 20240116.1
-    GIT_SHALLOW TRUE
-)
-FetchContent_MakeAvailable(abseil-cpp)
+# === Abseil Dependency (Vendored) ===
+add_subdirectory(third_party/abseil-cpp)
 
 # === Optimization Flags ===
 set(COMMON_FLAGS "-Wall -Wextra -Wpedantic -fstack-protector-strong -D_FORTIFY_SOURCE=2")
