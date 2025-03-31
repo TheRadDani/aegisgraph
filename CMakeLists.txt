@@ -61,12 +61,8 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g -fsanitize=address,undefined,leak -fno-omit-frame-
 
 # === Pybind11 and Python 3.12 Setup ===
 set(PYBIND11_FINDPYTHON ON)
-find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
+find_package(Python3 REQUIRED COMPONENTS Interpreter Development.Module Development.Embed)
 find_package(pybind11 REQUIRED CONFIG)
-
-message(STATUS "Python include dir: ${Python3_INCLUDE_DIRS}")
-message(STATUS "Python library    : ${Python3_LIBRARIES}")
-message(STATUS "Python executable : ${Python3_EXECUTABLE}")
 
 # === Source Files ===
 set(SOURCE_FILES
@@ -109,6 +105,7 @@ target_include_directories(aegisgraph PRIVATE
 
 # === Link Dependencies ===
 target_link_libraries(aegisgraph PRIVATE
+    Python3::Python
     absl::flat_hash_map
     ${LINK_LIBS}
     stdc++fs
