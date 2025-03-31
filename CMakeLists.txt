@@ -1,5 +1,5 @@
 # CMakeLists.txt for the aegisgraph project
-cmake_minimum_required(VERSION 3.28...3.28)
+cmake_minimum_required(VERSION 3.25...3.25)
 cmake_policy(SET CMP0148 NEW)  # Suppress CMP0148 warning
 cmake_policy(SET CMP0116 NEW)  # Handle file-based package requirements
 cmake_policy(SET CMP0144 NEW)  # Honor CMAKE_FIND_PACKAGE_REDIRECTS_DIR

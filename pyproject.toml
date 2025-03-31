@@ -9,8 +9,15 @@
 # ==============================================
 
 [build-system]
-requires = ["cibuildwheel", "setuptools", "wheel", "pybind11"]
-build-backend = "setuptools.build_meta"
+requires = [
+  "scikit-build-core>=0.8.0",
+  "cibuildwheel", 
+  "setuptools", 
+  "wheel",
+  "ninja",
+  "pybind11"
+]
+build-backend = "scikit_build_core.build"
 
 [project]
 name = "aegisgraph"
@@ -51,6 +58,7 @@ test = [
 minimum-version = "0.7"
 build-dir = "build"
 wheel.expand-macos-universal-tags = true
+wheel.py-api = "cp312"
 
 [project.urls]
 "Homepage" = "https://github.com/TheRadDani/aegisgraph"
@@ -60,7 +68,7 @@ Changelog = "https://github.com/TheRadDani/aegisgraph/releases"
 "Source Code" = 'https://github.com/TheRadDani/aegisgraph'
 
 [tool.scikit-build.cmake]
-minimum-version = "3.24"
+minimum-version = "3.25"
 build-type = "Release"
 args = [
   "--fresh",  # Forces new configuration, ignores cache
