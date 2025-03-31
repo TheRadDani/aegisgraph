@@ -1,7 +1,7 @@
 # ==============================================
 # pyproject.toml for packaging aegisgraph as a Python module
 # Author: Daniel Ferreto
-# Version: 1.1
+# Version: 1.0
 # Date: 2025-03-27
 # Description:
 #     Secure, high-performance C++ graph processing module
