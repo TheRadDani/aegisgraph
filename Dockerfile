@@ -1,5 +1,11 @@
-# Build stage
-FROM python:3.12-slim-bookworm AS builder
+# syntax=docker/dockerfile:1.4
+
+# Multi-stage build for efficient Python wheel packaging
+ARG PYTHON_VERSION=3.12
+ARG BASE_IMAGE=python:${PYTHON_VERSION}-slim-bookworm
+
+# =================== Builder Stage ===================
+FROM ${BASE_IMAGE} AS builder
 
 # Install build dependencies
 RUN apt-get update && \
@@ -9,8 +15,9 @@ RUN apt-get update && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
     build-essential \
-    cmake \
     git \
+    wget \
+    curl \
     ninja-build \
     libabsl-dev \
     libpython3-dev \
@@ -19,74 +26,34 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 # Install modern CMake (3.28+)
-RUN wget -q https://github.com/Kitware/CMake/releases/download/v3.28.3/cmake-3.28.3-linux-x86_64.sh && \
-    mkdir -p /opt/cmake && \
-    sh cmake-3.28.3-linux-x86_64.sh --prefix=/opt/cmake --skip-license && \
-    ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake
+RUN curl -L https://github.com/Kitware/CMake/releases/download/v4.0.0/cmake-4.0.0-linux-x86_64.tar.gz | tar xz -C /usr/local --strip-components=1
+
+RUN useradd -m builder
+USER builder
+WORKDIR /home/builder/app
+
+COPY --chown=builder:builder . .
+
+RUN pip install --user -U pip setuptools wheel && \
+    pip install --user scikit-build-core \
+    pybind11 \
+    build
+
+RUN python -m build --wheel --no-isolation \
+    -Ccmake.define.CMAKE_BUILD_TYPE=Release \
+    -Ccmake.define.CMAKE_EXE_LINKER_FLAGS="-fuse-ld=gold" \
+    -Ccmake.define.CMAKE_SHARED_LINKER_FLAGS="-fuse-ld=gold" \
+
+# =================== Final Stage ===================
+FROM ${BASE_IMAGE} AS runtime
 
 WORKDIR /app
-COPY . .
 
-RUN rm -rf build/ _skbuild/
+COPY --from=builder --chown=1000:1000 /home/builder/app/dist/*.whl ./
 
-# Configure build to match local environment structure
-ENV SKBUILD_BUILD_OPTIONS="-DCMAKE_INSTALL_PREFIX=/opt/venv/lib/python3.12/site-packages"
+# Install runtime dependencies (if any)
+RUN pip install --no-cache-dir $(ls *.whl)[test] && \
+    rm -f *.whl
 
-# Create wheel package
-RUN pip install --upgrade pip setuptools wheel && \
-    pip install scikit-build-core pybind11
-
-# Build with verbose logging and gold linker
-RUN pip wheel --wheel-dir=/app/wheels -v . \
-    --config-settings="cmake.args=-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=gold -DCMAKE_SHARED_LINKER_FLAGS=-fuse-ld=gold" \
-    --timeout 60 \
-    --retries 3
-    
-# Runtime stage
-FROM python:3.12-slim-bookworm
-
-# Install runtime dependencies with cleanup in single layer
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    libgomp1=12.2.0-14 \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-# Create and actiavate virtual environment
-RUN python -m venv /opt/venv --copies
-ENV PATH="/opt/venv/bin:$PATH" \
-    PYTHONPATH="/opt/venv/lib/python3.12/site-packages"
-
-# Install wheel in virtual environment
-COPY --from=builder /app/wheels /tmp/wheels
-RUN /opt/venv/bin/python -m pip install --no-cache-dir --force-reinstall /tmp/wheels/aegisgraph-*.whl && \
-    /opt/venv/bin/python -c "import aegisgraph" && \
-    rm -rf /tmp/wheels
-
-# Create application user with secure umask
-RUN useradd -r -u 1000 -d /app -s /bin/false appuser && \
-    mkdir -p /app && \
-    chown -R appuser:appuser /app
-
-# Security hardening
-ENV PYTHONUNBUFFERED="1" \
-    PYTHONDONTWRITEBYTECODE="1" \
-    PYTHONFAULTHANDLER="1" \
-    OMP_NUM_THREADS="1"
-
-USER appuser
-WORKDIR /app
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s \
-    CMD python -c "import aegisgraph" || exit 1
-
-# Metadata
-LABEL maintainer="Daniel Ferreto <ldanielfch@gmail.com>" \
-      org.opencontainers.image.source="https://github.com/TheRadDani/aegisgraph" \
-      org.opencontainers.image.licenses="MIT"
-
-# Secure entrypoint
-ENTRYPOINT ["python", "-I"]
-
-CMD ["-c", "import aegisgraph; print(f'✅ Module loaded successfully - v{aegisgraph.__version__}')"]
+# Optional: Set entrypoint for testing
+ENTRYPOINT ["python"]
