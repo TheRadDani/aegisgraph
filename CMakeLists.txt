@@ -35,7 +35,9 @@ endif()
 set(ABSL_PROPAGATE_CXX_STD ON)
 
 # === Abseil Dependency (Vendored) ===
-set(ABSL_ENABLE_128_BIT_INTEGERS OFF CACHE BOOL "Disable __int128 for ARM compatibility")
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64")
+  add_definitions(-DABSL_NO_INT128)
+endif()
 add_subdirectory(third_party/abseil-cpp)
 
 # === pybind11 Dependency (Vendored) ===
