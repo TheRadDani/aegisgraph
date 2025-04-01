@@ -19,8 +19,8 @@
 // Compiler optimization hints
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC optimize("O3")
-#pragma GCC target("tune=native")
 #endif
+
 
 namespace py = pybind11;
 

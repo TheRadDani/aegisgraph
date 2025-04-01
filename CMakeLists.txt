@@ -47,14 +47,17 @@ message(STATUS "PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")
 #find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 
 if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|amd64")
-    set(ARCH_FLAGS "${SIMD_FLAGS} -march=native")
-elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
-    set(ARCH_FLAGS "-march=armv8-a+sve2+crypto+fp16+rcpc+dotprod")
+    set(ARCH_FLAGS "-mtune=native -mavx2 -mfma -mbmi2 -ftree-vectorize -fno-strict-aliasing")
+elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64")
+    # Use conservative flags for compatibility
+    set(ARCH_FLAGS "-march=armv8-a+crypto+fp16+dotprod")
 else()
     set(ARCH_FLAGS "")
 endif()
 
+set(COMMON_FLAGS "-Wall -Wextra -Wpedantic -fstack-protector-strong -D_FORTIFY_SOURCE=2")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMMON_FLAGS} ${ARCH_FLAGS}")
+
 
 # Enable interprocedural optimization (LTO)
 include(CheckIPOSupported)
