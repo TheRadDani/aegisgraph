@@ -35,6 +35,7 @@ endif()
 set(ABSL_PROPAGATE_CXX_STD ON)
 
 # === Abseil Dependency (Vendored) ===
+set(ABSL_ENABLE_128_BIT_INTEGERS OFF CACHE BOOL "Disable __int128 for ARM compatibility")
 add_subdirectory(third_party/abseil-cpp)
 
 # === pybind11 Dependency (Vendored) ===
