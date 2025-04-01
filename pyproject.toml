@@ -100,8 +100,9 @@ test-requires = ["pytest", "pytest-cov"]
 
 
 [tool.cibuildwheel.linux]
-archs = ["x86_64"]
+archs = ["x86_64", "i686"]
 manylinux-x86_64-image = "manylinux2014"
+manylinux-i686-image = "manylinux2014"
 before-all = """
 yum install -y libatomic || apt-get install -y libatomic1 || true
 """
