@@ -14,6 +14,7 @@ sudo apt install \
 python -m pip install --upgrade pip
 python3 -m venv .aegisgraph-env
 source .aegisgraph-env/bin/activate
+pip install --upgrade pip
 pip install pybind11
 
 # Clean build

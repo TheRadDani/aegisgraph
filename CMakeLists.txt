@@ -66,7 +66,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g -fsanitize=address,undefined,leak -fno-omit-frame-
 
 # === Pybind11 and Python 3.12 Setup ===
 set(PYBIND11_FINDPYTHON ON)
-find_package(Python3 REQUIRED COMPONENTS Interpreter Development.Module Development.Embed)
+find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 find_package(pybind11 REQUIRED CONFIG)
 
 # === Source Files ===
@@ -86,7 +86,6 @@ pybind11_add_module(aegisgraph ${SOURCE_FILES})
 target_include_directories(aegisgraph PRIVATE 
     ${Python3_INCLUDE_DIRS}
 )
-target_link_libraries(aegisgraph PRIVATE ${Python3_LIBRARIES})
 
 # === Security Hardening ===
 target_compile_options(aegisgraph PRIVATE
@@ -115,6 +114,7 @@ target_link_libraries(aegisgraph PRIVATE
     ${LINK_LIBS}
     stdc++fs
     pthread
+    pybind11::module
 )
 
 # === Optimization Linker Flags ===
