@@ -74,7 +74,7 @@ args = [
   "-G", "Ninja",
   "--no-warn-unused-cli"
 ]
-define = { "ABSEIL_BUILD_TESTING" = false, "ABSL_PROPAGATE_CXX_STD" = true, "Python3_ROOT_DIR" = "{python}" }
+define = { "ABSL_NO_INT128" = "ON", "ABSEIL_BUILD_TESTING" = false, "ABSL_PROPAGATE_CXX_STD" = true, "Python3_ROOT_DIR" = "{python}" }
 
 
 [tool.scikit-build.sdist]

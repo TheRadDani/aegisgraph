@@ -35,7 +35,7 @@ endif()
 set(ABSL_PROPAGATE_CXX_STD ON)
 
 # === Abseil Dependency (Vendored) ===
-if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64")
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm|arm64")
   add_definitions(-DABSL_NO_INT128)
 endif()
 add_subdirectory(third_party/abseil-cpp)
