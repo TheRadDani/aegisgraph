@@ -168,10 +168,41 @@ void Graph::delete_node(int node) {
     adj_list.erase(it);
 }
 
-void Graph::save_graph(const std::string& filename) const {
-    if (!validate_filepath(filename)) throw std::runtime_error("Invalid path");
+void Graph::save_graph(const std::string& filepath) const {
+    // Validate the parent directory and path security
+    try {
+        std::filesystem::path path_obj(filepath);
+        auto parent_path = path_obj.parent_path();
+        
+        // Handle cases where parent_path is empty (e.g., current directory)
+        if (parent_path.empty()) {
+            parent_path = ".";
+        }
+        
+        // Get absolute path of the parent directory
+        auto abs_parent = std::filesystem::absolute(parent_path);
+        
+        // Check if parent directory exists
+        if (!std::filesystem::exists(abs_parent)) {
+            throw std::runtime_error("Parent directory does not exist");
+        }
+        
+        // Check if parent is a directory
+        if (!std::filesystem::is_directory(abs_parent)) {
+            throw std::runtime_error("Parent path is not a directory");
+        }
+        
+        // Normalize the path to check for directory traversal
+        auto canon_parent = std::filesystem::canonical(abs_parent);
+        std::string normalized_path = (canon_parent / path_obj.filename()).string();
+        if (normalized_path.find("..") != std::string::npos) {
+            throw std::runtime_error("Path contains directory traversal");
+        }
+    } catch (const std::exception& e) {
+        throw std::runtime_error(std::string("Invalid path: ") + e.what());
+    }
 
-    std::ofstream outfile(filename);
+    std::ofstream outfile(filepath);
     if (!outfile.is_open()) throw std::runtime_error("Failed to open output file");
 
     absl::flat_hash_set<std::pair<int, int>, PairHash> written_edges;
