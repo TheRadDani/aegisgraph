@@ -14,7 +14,7 @@ requires = [
   "cibuildwheel>=2.23.2", 
   "setuptools>=68.0.0", 
   "wheel>=0.41.0",
-  "ninja>=0.41.0",
+  "ninja",
   "pybind11>=2.11.1",
   "cmake>=3.25.0",
 ]
@@ -24,9 +24,6 @@ build-backend = "scikit_build_core.build"
 name = "aegisgraph"
 version = "1.0.1"
 description = "High-performance graph processing and random walk library in C++ with Python bindings"
-authors = [
-  { name = "Daniel Ferreto", email = "ldanielfch@gmail.com" }
-]
 license = { text = "MIT" }
 requires-python = ">=3.10"
 readme = "README.md"
@@ -36,9 +33,7 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
-    "Operating System :: POSIX :: Linux",
-    "Operating System :: MacOS :: MacOS X",
-    "Operating System :: Microsoft :: Windows",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -48,6 +43,10 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules"
 ]
 
+[[project.authors]]
+name = 'Daniel Ferreto'
+email = 'ldanielfch@gmail.com'
+
 [project.optional-dependencies]
 test = [
     "pytest>=7.0",
@@ -56,8 +55,8 @@ test = [
 ]
 
 [tool.scikit-build]
-minimum-version = "0.7"
-build-dir = "build"
+wheel.packages = ["aegisgraph"]
+build-dir = "build-cmake"
 wheel.py-api = "cp310"
 wheel.expand-macos-universal-tags = true
 
@@ -71,11 +70,11 @@ Changelog = "https://github.com/TheRadDani/aegisgraph/releases"
 [tool.scikit-build.cmake]
 args = [
   "--fresh",
-  "-DPYBIND11_FINDPYTHON=ON",
+  #"-DPYBIND11_FINDPYTHON=ON",
   "-G", "Ninja",
   "--no-warn-unused-cli"
 ]
-define = { "ABSEIL_BUILD_TESTING" = false, "ABSL_PROPAGATE_CXX_STD" = true }
+define = { "ABSEIL_BUILD_TESTING" = false, "ABSL_PROPAGATE_CXX_STD" = true, "Python3_ROOT_DIR" = "{python}" }
 
 
 [tool.scikit-build.sdist]
@@ -91,10 +90,11 @@ include = [
 ]
 
 [tool.cibuildwheel]
-build = "cp310-* cp311-* cp312-*"  # Build for multiple Python versions
+build = "cp310-* cp311-* cp312-*"
 test-skip = "*-musllinux* *-win32 *-manylinux_i686"
 test-command = "pytest {project}/tests"
 test-requires = ["pytest", "pytest-cov"]
+repair-wheel-command = "auditwheel repair -w {dest_dir} {wheel}"
 
 
 [tool.cibuildwheel.linux]
@@ -102,7 +102,8 @@ archs = ["x86_64", "i686"]
 manylinux-x86_64-image = "quay.io/pypa/manylinux2014_x86_64"
 manylinux-i686-image = "quay.io/pypa/manylinux2014_i686"
 before-all = """
-yum install -y libatomic python3-devel || apt-get update && apt-get install -y libatomic1 python3-dev || true
+yum install -y libatomic python3-devel && \
+ln -sf /opt/python/cp310-cp310/bin/python3.10 /usr/bin/python3
 """
 
 [tool.cibuildwheel.macos]
@@ -110,10 +111,10 @@ archs = ["x86_64", "arm64"]
 macos-deployment-target = "10.15"
 
 [tool.cibuildwheel.environment]
-PYTHON_EXECUTABLE = "{python}"
-SKBUILD_CMAKE_ARGS = "-DCMAKE_CXX_FLAGS=-mavx2 -mfma -mbmi2 -Wno-deprecated-declarations"
-CIBW_MANYLINUX_X86_64_IMAGE = "manylinux2014"
+CMAKE_BUILD_PARALLEL_LEVEL = "4"
+SKBUILD_CMAKE_ARGS = "-DCMAKE_CXX_FLAGS=-mavx2 -mfma -mbmi2 -Wno-deprecated-declarations -DPYTHON_EXECUTABLE={python}"
 CIBW_BEFORE_BUILD = "pip install pybind11"
+CIBW_REPAIR_WHEEL_COMMAND = "auditwheel repair -w {dest_dir} {wheel}"
 CIBW_BUILD_VERBOSITY = 3
 
 # pytest configuration
