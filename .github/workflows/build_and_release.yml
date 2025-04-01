@@ -25,7 +25,11 @@ jobs:
 
       - name: Install libomp on macOS
         if: startsWith(matrix.os, 'macos')
-        run: brew install libomp
+        run: |
+          brew install libomp
+          echo "OPENMP_PATH=$(brew --prefix libomp)" >> $GITHUB_ENV
+          echo "CMAKE_CXX_FLAGS=-Xpreprocessor -fopenmp" >> $GITHUB_ENV
+          echo "CMAKE_EXE_LINKER_FLAGS=-L$OPENMP_PATH/lib -lomp" >> $GITHUB_ENV
 
       - name: Install base build dependencies
         run: |
