@@ -31,6 +31,8 @@
 *.out
 *.app
 build/
+dist/
 *env/
 .vscode/
 *.egg-info/
+*env
