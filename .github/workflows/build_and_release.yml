@@ -22,9 +22,6 @@ jobs:
         with:
           submodules: recursive
       
-      - name: Set up Python
-        uses: actions/setup-python@v5
-
       - uses: actions/setup-python@v5
         name: Install Python
         with:
