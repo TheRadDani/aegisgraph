@@ -6,15 +6,19 @@ cmake_policy(SET CMP0144 NEW)  # Honor CMAKE_FIND_PACKAGE_REDIRECTS_DIR
 
 project(aegisgraph LANGUAGES CXX)
 
+# === Project Configuration ===
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_LIBCPP_DISABLE_AVAILABILITY")
     set(CMAKE_INSTALL_RPATH "$ORIGIN")
 endif()
 
-# === Project Configuration ===
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+# === Optimization Flags ===
+set(COMMON_FLAGS "-Wall -Wextra -Wpedantic -fstack-protector-strong -D_FORTIFY_SOURCE=2")
+set(SIMD_FLAGS "-mavx2 -mfma -mbmi2 -ftree-vectorize -fno-strict-aliasing")
 
 # === Enable OpenMP ===
 find_package(OpenMP REQUIRED)
@@ -29,12 +33,18 @@ endif()
 
 # === Abseil Dependency ===
 set(ABSL_PROPAGATE_CXX_STD ON)
+
 # === Abseil Dependency (Vendored) ===
 add_subdirectory(third_party/abseil-cpp)
 
-# === Optimization Flags ===
-set(COMMON_FLAGS "-Wall -Wextra -Wpedantic -fstack-protector-strong -D_FORTIFY_SOURCE=2")
-set(SIMD_FLAGS "-mavx2 -mfma -mbmi2 -ftree-vectorize -fno-strict-aliasing")
+# === pybind11 Dependency (Vendored) ===
+add_subdirectory(third_party/pybind11)
+
+message(STATUS "PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")
+
+
+# === Find Python (for linking only) ===
+#find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 
 if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|amd64")
     set(ARCH_FLAGS "${SIMD_FLAGS} -march=native")
@@ -64,10 +74,6 @@ endif()
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -flto=auto")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -fsanitize=address,undefined,leak -fno-omit-frame-pointer")
 
-# === Pybind11 and Python 3.12 Setup ===
-set(PYBIND11_FINDPYTHON ON)
-find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
-find_package(pybind11 REQUIRED CONFIG)
 
 # === Source Files ===
 set(SOURCE_FILES
@@ -82,9 +88,9 @@ configure_file(${CMAKE_SOURCE_DIR}/asan_options.cfg ${CMAKE_BINARY_DIR}/asan_opt
 # === Main Target ===
 pybind11_add_module(aegisgraph ${SOURCE_FILES})
 
-# === Include and Link Python Explicitly ===
-target_include_directories(aegisgraph PRIVATE 
-    ${Python3_INCLUDE_DIRS}
+# === Include Directories ===
+target_include_directories(aegisgraph PRIVATE
+    ${CMAKE_SOURCE_DIR}/include
 )
 
 # === Security Hardening ===
@@ -97,24 +103,18 @@ target_link_options(aegisgraph PRIVATE
     "LINKER:-z,now"
     "LINKER:-z,noexecstack"
     "LINKER:-z,noexecheap"
-)
-
-# === Include Directories ===
-target_include_directories(aegisgraph PRIVATE
-    ${CMAKE_SOURCE_DIR}/include
-    ${CMAKE_SOURCE_DIR}/src
-    ${CMAKE_SOURCE_DIR}/bindings
-    ${Python3_INCLUDE_DIRS}
+    "LINKER:--no-undefined"
+    "LINKER:--as-needed"
+    "LINKER:--hash-style=gnu"
 )
 
 # === Link Dependencies ===
 target_link_libraries(aegisgraph PRIVATE
-    Python3::Python
     absl::flat_hash_map
     ${LINK_LIBS}
-    stdc++fs
     pthread
     pybind11::module
+    pybind11::embed
 )
 
 # === Optimization Linker Flags ===
@@ -147,9 +147,9 @@ execute_process(
 )
 
 install(TARGETS aegisgraph
-        LIBRARY DESTINATION ${PYTHON_SITE_DIR}
-        COMPONENT python
+    LIBRARY DESTINATION .
 )
+
 
 # === Post-build Security Check ===
 add_custom_command(TARGET aegisgraph POST_BUILD
