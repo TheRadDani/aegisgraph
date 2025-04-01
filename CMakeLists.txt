@@ -23,10 +23,28 @@ set(SIMD_FLAGS "-mavx2 -mfma -mbmi2 -ftree-vectorize -fno-strict-aliasing")
 # === Enable OpenMP ===
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     message(STATUS "Configuring OpenMP manually for macOS")
+
+    # Detect architecture
+    execute_process(
+        COMMAND uname -m
+        OUTPUT_VARIABLE ARCHITECTURE
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+    if(ARCHITECTURE STREQUAL "arm64")
+        set(OPENMP_PATH "/opt/homebrew")
+    else()
+        set(OPENMP_PATH "/usr/local")
+    endif()
+
     set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp")
     set(OpenMP_CXX_LIB_NAMES "omp")
-    set(OpenMP_omp_LIBRARY "/opt/homebrew/lib/libomp.dylib")
+    set(OpenMP_omp_LIBRARY "${OPENMP_PATH}/lib/libomp.dylib")
     set(OpenMP_FOUND TRUE)
+
+    message(STATUS "Detected architecture: ${ARCHITECTURE}")
+    message(STATUS "Using OpenMP library from: ${OpenMP_omp_LIBRARY}")
+
 else()
     find_package(OpenMP REQUIRED)
 endif()
