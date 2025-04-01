@@ -21,14 +21,21 @@ set(COMMON_FLAGS "-Wall -Wextra -Wpedantic -fstack-protector-strong -D_FORTIFY_S
 set(SIMD_FLAGS "-mavx2 -mfma -mbmi2 -ftree-vectorize -fno-strict-aliasing")
 
 # === Enable OpenMP ===
-find_package(OpenMP REQUIRED)
-if(OpenMP_CXX_FOUND)
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    message(STATUS "Configuring OpenMP manually for macOS")
+    set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp")
+    set(OpenMP_CXX_LIB_NAMES "omp")
+    set(OpenMP_omp_LIBRARY "/opt/homebrew/lib/libomp.dylib")
+    set(OpenMP_FOUND TRUE)
+else()
+    find_package(OpenMP REQUIRED)
+endif()
+
+if(OpenMP_FOUND)
     message(STATUS "OpenMP CXX flags: ${OpenMP_CXX_FLAGS}")
-    message(STATUS "OpenMP CXX libs: ${OpenMP_CXX_LIB_NAMES}")
-    # Add OpenMP flags to all targets
-    add_link_options(${OpenMP_CXX_FLAGS})
-    # Store libs for later linking
-    list(APPEND LINK_LIBS ${OpenMP_CXX_LIB_NAMES})
+    add_compile_options(${OpenMP_CXX_FLAGS})
+    add_link_options(${OpenMP_CXX_FLAGS} ${OpenMP_omp_LIBRARY})
+    list(APPEND LINK_LIBS ${OpenMP_omp_LIBRARY})
 endif()
 
 # === Abseil Dependency ===
