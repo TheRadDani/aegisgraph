@@ -20,6 +20,11 @@ endif()
 set(COMMON_FLAGS "-Wall -Wextra -Wpedantic -fstack-protector-strong -D_FORTIFY_SOURCE=2")
 set(SIMD_FLAGS "-mavx2 -mfma -mbmi2 -ftree-vectorize -fno-strict-aliasing")
 
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    add_compile_options(-Wno-gcc-compat -Wno-unknown-pragmas)
+endif()
+
 # === Enable OpenMP ===
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     message(STATUS "Configuring OpenMP manually for macOS")
