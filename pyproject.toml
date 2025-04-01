@@ -11,7 +11,7 @@
 [build-system]
 requires = [
   "scikit-build-core>=0.8.0",
-  "cibuildwheel>=2.16.2", 
+  "cibuildwheel>=2.23.2", 
   "setuptools>=68.0.0", 
   "wheel>=0.41.0",
   "ninja>=0.41.0",
@@ -58,7 +58,7 @@ test = [
 [tool.scikit-build]
 minimum-version = "0.7"
 build-dir = "build"
-wheel.py-api = "cp312"
+wheel.py-api = "cp310"
 wheel.expand-macos-universal-tags = true
 
 [project.urls]
@@ -69,15 +69,14 @@ Changelog = "https://github.com/TheRadDani/aegisgraph/releases"
 "Source Code" = 'https://github.com/TheRadDani/aegisgraph'
 
 [tool.scikit-build.cmake]
-minimum-version = "3.25"
-build-type = "Release"
 args = [
-  "--fresh",  # Forces new configuration, ignores cache
+  "--fresh",
   "-DPYBIND11_FINDPYTHON=ON",
-  "-G", "Ninja",  # Force Ninja generator
+  "-DPython3_EXECUTABLE:FILEPATH=${{CIBW_BUILD_PYTHON}}/bin/python3",
+  "-G", "Ninja",
   "--no-warn-unused-cli"
 ]
-define = { "ABSEIL_BUILD_TESTING" = false, "ABSL_PROPAGATE_CXX_STD" = true, "Python3_FIND_STRATEGY" = "LOCATION" }
+define = { "ABSEIL_BUILD_TESTING" = false, "ABSL_PROPAGATE_CXX_STD" = true }
 
 
 [tool.scikit-build.sdist]
@@ -101,10 +100,10 @@ test-requires = ["pytest", "pytest-cov"]
 
 [tool.cibuildwheel.linux]
 archs = ["x86_64", "i686"]
-manylinux-x86_64-image = "manylinux2014"
-manylinux-i686-image = "manylinux2014"
+manylinux-x86_64-image = "quay.io/pypa/manylinux2014_x86_64"
+manylinux-i686-image = "quay.io/pypa/manylinux2014_i686"
 before-all = """
-yum install -y libatomic || apt-get install -y libatomic1 || true
+yum install -y libatomic python3-devel || apt-get update && apt-get install -y libatomic1 python3-dev || true
 """
 
 [tool.cibuildwheel.macos]
@@ -115,6 +114,7 @@ macos-deployment-target = "10.15"
 SKBUILD_CMAKE_ARGS = "-DCMAKE_CXX_FLAGS=-mavx2 -mfma -mbmi2 -Wno-deprecated-declarations"
 CIBW_MANYLINUX_X86_64_IMAGE = "manylinux2014"
 CIBW_BEFORE_BUILD = "pip install pybind11"
+CIBW_BUILD_VERBOSITY = 3
 
 # pytest configuration
 [tool.pytest.ini_options]
