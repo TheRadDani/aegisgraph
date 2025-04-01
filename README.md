@@ -1,5 +1,8 @@
 AegisGraph: High-Performance Graph Library in plain C++ for Python
-========
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15122711.svg)](https://doi.org/10.5281/zenodo.15122711)
+
+
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/TheRadDani/aegisgraph/main/images/aegrisgraph_logo.gif" 
