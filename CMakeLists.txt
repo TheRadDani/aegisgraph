@@ -75,6 +75,9 @@ endif()
 
 # === Abseil Dependency ===
 set(ABSL_PROPAGATE_CXX_STD ON)
+set(ABSL_ENABLE_INSTALL ON)
+set(ABSL_BUILD_TESTING OFF)
+set(ABSL_USE_EXTERNAL_GOOGLETEST ON)
 
 # === Abseil Dependency (Vendored) ===
 if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm|arm64")
