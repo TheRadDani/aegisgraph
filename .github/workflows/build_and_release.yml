@@ -26,6 +26,13 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
       
+      - name: Install libomp (macOS only)
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          brew install libomp
+          echo "CMAKE_CXX_FLAGS=-Xpreprocessor -fopenmp -lomp" >> $GITHUB_ENV
+          echo "CMAKE_EXE_LINKER_FLAGS=-lomp" >> $GITHUB_ENV
+      
       - name: Install base build dependencies
         run: |
           python -m pip install --upgrade pip
