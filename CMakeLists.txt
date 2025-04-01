@@ -17,7 +17,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 
 # === Optimization Flags ===
-set(COMMON_FLAGS "-Wall -Wextra -Wpedantic -fstack-protector-strong -D_FORTIFY_SOURCE=2")
+set(COMMON_FLAGS "-Wall -Wextra -fstack-protector-strong -D_FORTIFY_SOURCE=2")
 set(SIMD_FLAGS "-mavx2 -mfma -mbmi2 -ftree-vectorize -fno-strict-aliasing")
 
 # === Enable OpenMP ===
