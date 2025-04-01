@@ -24,7 +24,7 @@ set(SIMD_FLAGS "-mavx2 -mfma -mbmi2 -ftree-vectorize -fno-strict-aliasing")
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     message(STATUS "Configuring OpenMP manually for macOS")
 
-    # Detect architecture
+    # Detect architecture (M1/M2 vs Intel)
     execute_process(
         COMMAND uname -m
         OUTPUT_VARIABLE ARCHITECTURE
@@ -40,13 +40,25 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp")
     set(OpenMP_CXX_LIB_NAMES "omp")
     set(OpenMP_omp_LIBRARY "${OPENMP_PATH}/lib/libomp.dylib")
-    set(OpenMP_FOUND TRUE)
 
-    message(STATUS "Detected architecture: ${ARCHITECTURE}")
-    message(STATUS "Using OpenMP library from: ${OpenMP_omp_LIBRARY}")
-
+    if(EXISTS "${OpenMP_omp_LIBRARY}")
+        set(OpenMP_FOUND TRUE)
+        message(STATUS "Found OpenMP at ${OpenMP_omp_LIBRARY}")
+    else()
+        set(OpenMP_FOUND FALSE)
+        message(WARNING "OpenMP library not found at ${OpenMP_omp_LIBRARY}")
+    endif()
 else()
     find_package(OpenMP REQUIRED)
+endif()
+
+if(OpenMP_FOUND)
+    message(STATUS "OpenMP CXX flags: ${OpenMP_CXX_FLAGS}")
+    add_compile_options(${OpenMP_CXX_FLAGS})
+    add_link_options(${OpenMP_CXX_FLAGS} ${OpenMP_omp_LIBRARY})
+    list(APPEND LINK_LIBS ${OpenMP_omp_LIBRARY})
+else()
+    message(WARNING "OpenMP not found – build may be slower")
 endif()
 
 if(OpenMP_FOUND)
