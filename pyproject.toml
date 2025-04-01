@@ -11,11 +11,12 @@
 [build-system]
 requires = [
   "scikit-build-core>=0.8.0",
-  "cibuildwheel", 
-  "setuptools", 
-  "wheel",
-  "ninja",
-  "pybind11>=2.11.1"
+  "cibuildwheel>=2.16.2", 
+  "setuptools>=68.0.0", 
+  "wheel>=0.41.0",
+  "ninja>=0.41.0",
+  "pybind11>=2.11.1",
+  "cmake>=3.25.0",
 ]
 build-backend = "scikit_build_core.build"
 
@@ -31,21 +32,21 @@ requires-python = ">=3.10"
 readme = "README.md"
 keywords = ["graph", "cpp", "pybind11", "network", "random walk", "high-performance"]
 classifiers = [
-  'Development Status :: 5 - Production/Stable',
-  'Intended Audience :: Developers',
-  'Intended Audience :: Science/Research',
-  "License :: OSI Approved :: MIT License",
-  'Operating System :: OS Independent',
-  'Programming Language :: Python :: 3',
-  'Programming Language :: Python :: 3.11',
-  'Programming Language :: Python :: 3.12',
-  'Programming Language :: Python :: 3.13',
-  'Programming Language :: Python :: 3 :: Only',
-  "Topic :: Scientific/Engineering :: Information Analysis",
-  "Development Status :: 4 - Beta"
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: C++",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Software Development :: Libraries :: Python Modules"
 ]
-
-dependencies = []
 
 [project.optional-dependencies]
 test = [
@@ -57,6 +58,7 @@ test = [
 [tool.scikit-build]
 minimum-version = "0.7"
 build-dir = "build"
+wheel.py-api = "cp312"
 wheel.expand-macos-universal-tags = true
 
 [project.urls]
@@ -73,7 +75,6 @@ args = [
   "--fresh",  # Forces new configuration, ignores cache
   "-DPYBIND11_FINDPYTHON=ON",
   "-G", "Ninja",  # Force Ninja generator
-  "-GNinja",
   "--no-warn-unused-cli"
 ]
 define = { "ABSEIL_BUILD_TESTING" = false, "ABSL_PROPAGATE_CXX_STD" = true, "Python3_FIND_STRATEGY" = "LOCATION" }
@@ -92,11 +93,27 @@ include = [
 ]
 
 [tool.cibuildwheel]
-build-frontend = "build"
-skip = "*-musllinux*"  # Abseil has musl compatibility issues
+build = "cp310-* cp311-* cp312-*"  # Build for multiple Python versions
+test-skip = "*-musllinux* *-win32 *-manylinux_i686"
 test-command = "pytest {project}/tests"
 test-requires = ["pytest", "pytest-cov"]
-environment = { "CFLAGS" = "-mavx2 -mfma -mbmi2", "CXXFLAGS" = "-mavx2 -mfma -mbmi2" }
+
+
+[tool.cibuildwheel.linux]
+archs = ["x86_64"]
+manylinux-x86_64-image = "manylinux2014"
+before-all = """
+yum install -y libatomic || apt-get install -y libatomic1 || true
+"""
+
+[tool.cibuildwheel.macos]
+archs = ["x86_64", "arm64"]
+macos-deployment-target = "10.15"
+
+[tool.cibuildwheel.environment]
+SKBUILD_CMAKE_ARGS = "-DCMAKE_CXX_FLAGS=-mavx2 -mfma -mbmi2 -Wno-deprecated-declarations"
+CIBW_MANYLINUX_X86_64_IMAGE = "manylinux2014"
+CIBW_BEFORE_BUILD = "pip install pybind11"
 
 # pytest configuration
 [tool.pytest.ini_options]
