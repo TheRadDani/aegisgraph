@@ -2,10 +2,10 @@ name: Build and Release to PyPI
 
 on:
   push:
-    branches:
-      - main
-    #tags:
-    #  - aephisgraph-*
+    #branches:
+    #  - main
+    tags:
+      - aephisgraph-*
 jobs:
   build-release:
     name: upload release to PyPI
