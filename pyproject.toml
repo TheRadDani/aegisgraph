@@ -57,7 +57,7 @@ test = [
 [tool.scikit-build]
 wheel.packages = ["aegisgraph"]
 build-dir = "build-cmake"
-wheel.py-api = "cp310"
+wheel.py-api = "cp312"
 wheel.expand-macos-universal-tags = true
 
 [project.urls]
